@@ -1,0 +1,160 @@
+Module(
+    body=[
+        FunctionDef(
+            name='matching_test',
+            args=arguments(
+                args=[
+                    arg(
+                        arg='x',
+                        annotation=Name(id='int', ctx=Load())),
+                    arg(
+                        arg='y',
+                        annotation=Name(id='str', ctx=Load()))]),
+            body=[
+                Match(
+                    subject=Name(id='x', ctx=Load()),
+                    cases=[
+                        match_case(
+                            pattern=MatchValue(
+                                value=Constant(value=1)),
+                            body=[
+                                Expr(
+                                    value=Call(
+                                        func=Name(id='print', ctx=Load()),
+                                        args=[
+                                            Constant(value='x is one')]))]),
+                        match_case(
+                            pattern=MatchValue(
+                                value=Constant(value=2)),
+                            body=[
+                                Expr(
+                                    value=Call(
+                                        func=Name(id='print', ctx=Load()),
+                                        args=[
+                                            Constant(value='x is two')]))]),
+                        match_case(
+                            pattern=MatchAs(),
+                            body=[
+                                Expr(
+                                    value=Call(
+                                        func=Name(id='print', ctx=Load()),
+                                        args=[
+                                            Constant(value='x is something else')]))])]),
+                Match(
+                    subject=Name(id='y', ctx=Load()),
+                    cases=[
+                        match_case(
+                            pattern=MatchValue(
+                                value=Constant(value='a')),
+                            body=[
+                                Expr(
+                                    value=Call(
+                                        func=Name(id='print', ctx=Load()),
+                                        args=[
+                                            Constant(value='y is a')]))]),
+                        match_case(
+                            pattern=MatchValue(
+                                value=Constant(value='b')),
+                            body=[
+                                Expr(
+                                    value=Call(
+                                        func=Name(id='print', ctx=Load()),
+                                        args=[
+                                            Constant(value='y is b')]))]),
+                        match_case(
+                            pattern=MatchAs(),
+                            body=[
+                                Expr(
+                                    value=Call(
+                                        func=Name(id='print', ctx=Load()),
+                                        args=[
+                                            Constant(value='y is something else')]))])]),
+                Assign(
+                    targets=[
+                        Name(id='c', ctx=Store())],
+                    value=Dict(
+                        keys=[
+                            Constant(value='x'),
+                            Constant(value='y')],
+                        values=[
+                            Name(id='x', ctx=Load()),
+                            Name(id='y', ctx=Load())])),
+                Match(
+                    subject=Name(id='c', ctx=Load()),
+                    cases=[
+                        match_case(
+                            pattern=MatchMapping(
+                                keys=[
+                                    Constant(value='x'),
+                                    Constant(value='y')],
+                                patterns=[
+                                    MatchValue(
+                                        value=Constant(value=1)),
+                                    MatchValue(
+                                        value=Constant(value='a'))]),
+                            body=[
+                                Expr(
+                                    value=Call(
+                                        func=Name(id='print', ctx=Load()),
+                                        args=[
+                                            Constant(value="c is {x: 1, y: 'a'}")]))]),
+                        match_case(
+                            pattern=MatchMapping(
+                                keys=[
+                                    Constant(value='x'),
+                                    Constant(value='y')],
+                                patterns=[
+                                    MatchValue(
+                                        value=Constant(value=2)),
+                                    MatchValue(
+                                        value=Constant(value='b'))]),
+                            body=[
+                                Expr(
+                                    value=Call(
+                                        func=Name(id='print', ctx=Load()),
+                                        args=[
+                                            Constant(value="c is {x: 2, y: 'b'}")]))]),
+                        match_case(
+                            pattern=MatchMapping(
+                                keys=[
+                                    Constant(value='x'),
+                                    Constant(value='y')],
+                                patterns=[
+                                    MatchAs(),
+                                    MatchAs()]),
+                            body=[
+                                Expr(
+                                    value=Call(
+                                        func=Name(id='print', ctx=Load()),
+                                        args=[
+                                            JoinedStr(
+                                                values=[
+                                                    Constant(value='c is {x: '),
+                                                    FormattedValue(
+                                                        value=Subscript(
+                                                            value=Name(id='c', ctx=Load()),
+                                                            slice=Constant(value='x'),
+                                                            ctx=Load()),
+                                                        conversion=-1),
+                                                    Constant(value=', y: '),
+                                                    FormattedValue(
+                                                        value=Subscript(
+                                                            value=Name(id='c', ctx=Load()),
+                                                            slice=Constant(value='y'),
+                                                            ctx=Load()),
+                                                        conversion=-1),
+                                                    Constant(value='}')])]))]),
+                        match_case(
+                            pattern=MatchAs(),
+                            body=[
+                                Expr(
+                                    value=Call(
+                                        func=Name(id='print', ctx=Load()),
+                                        args=[
+                                            Constant(value='c is something else')]))])])]),
+        Expr(
+            value=Call(
+                func=Name(id='matching_test', ctx=Load()),
+                args=[
+                    Constant(value=2),
+                    Constant(value='b')]))])
