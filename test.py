@@ -75,5 +75,13 @@ def matching_test(x: int, y: str):
         case _:
             print("Matched something else")
 
+    e = True
+
+    match e:
+        case True:
+            print("e is True")
+        case False:
+            print("e is False")
+
 
 matching_test(2, "b")

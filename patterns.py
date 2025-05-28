@@ -75,6 +75,10 @@ class Pattern:
     def is_object(self):
         return self.constructor.startswith('object_')
 
+    @property
+    def is_constructed(self):
+        return self.is_literal or self.is_sequence
+
     def __str__(self):
         if self.is_empty:
             return 'Empty()'
