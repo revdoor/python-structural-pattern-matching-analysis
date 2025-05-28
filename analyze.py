@@ -1,6 +1,7 @@
 import argparse
 import ast
 from pattern_converter import convert_pattern, convert_pattern_matrix
+from pattern_matching_checker import *
 
 
 if __name__ == '__main__':
@@ -19,7 +20,7 @@ if __name__ == '__main__':
     with open(f'ast_dump_{target.split(".")[0]}.txt', 'w') as f:
         f.write(ast.dump(root, indent=4))
 
-    print(ast.dump(root, indent=4))
+    # print(ast.dump(root, indent=4))
 
     for node in ast.walk(root):
         # if isinstance(node, ast.pattern):
@@ -36,6 +37,10 @@ if __name__ == '__main__':
                 print(f"Converted pattern matrix")
                 for line in pattern_matrix:
                     print(f'[{", ".join(str(p) for p in line)}]')
+                print()
+
+                check_useless_patterns(pattern_matrix)
+                check_non_exhaustive_matches(pattern_matrix)
                 print()
             except Exception as e:
                 print(f"Error converting match node {node}: {e}")

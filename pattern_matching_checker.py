@@ -202,3 +202,23 @@ def is_complete_signature(constructors: Set[str]) -> bool:
 
 def is_useful(matrix: PatternMatrix, pattern_vector: PatternVector) -> bool:
     return _urec(matrix, pattern_vector)
+
+
+def check_useless_patterns(matrix: PatternMatrix):
+    for i in range(len(matrix)):
+        partial_matrix = matrix[:i]
+        current_row = matrix[i]
+
+        if not is_useful(partial_matrix, current_row):
+            print(f"! Row {i} is useless: {current_row}")
+        else:
+            print(f"* Row {i} is useful: {current_row}")
+
+
+def check_non_exhaustive_matches(matrix: PatternMatrix):
+    arity = len(matrix[0]) if matrix else 0
+
+    if is_useful(matrix, [Pattern.wildcard()] * arity):
+        print("The match is non-exhaustive. There are patterns that are not covered by the match cases.")
+    else:
+        print("The match is exhaustive. All possible patterns are covered by the match cases.")
