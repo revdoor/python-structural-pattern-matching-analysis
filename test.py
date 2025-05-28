@@ -43,5 +43,11 @@ def matching_test(x: int, y: str):
         case _:
             print("d is something else")
 
+    match x, y:
+        case 1, "a":
+            print("x is 1 and y is 'a'")
+        case 2, "b":
+            print("x is 2 and y is 'b'")
+
 
 matching_test(2, "b")

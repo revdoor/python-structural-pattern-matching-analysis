@@ -40,26 +40,54 @@ class Pattern:
     def custom_class(cls, name: str, args: List['Pattern'], kwargs: Dict[str, 'Pattern']):
         return cls(constructor=f'custom_class_{name}', args=args, kwargs=kwargs)
 
+    @property
+    def is_wildcard(self):
+        return self.constructor == '_'
+
+    @property
+    def is_wildcard_seq(self):
+        return self.constructor == '_seq'
+
+    @property
+    def is_literal(self):
+        return self.constructor.startswith('literal_')
+
+    @property
+    def is_or(self):
+        return self.constructor == 'or'
+
+    @property
+    def is_sequence(self):
+        return self.constructor.startswith('sequence_')
+
+    @property
+    def is_map(self):
+        return self.constructor.startswith('map_')
+
+    @property
+    def is_custom_class(self):
+        return self.constructor.startswith('custom_class_')
+
     def __str__(self):
-        if self.constructor == '_':
+        if self.is_wildcard:
             return 'Wildcard()'
 
-        elif self.constructor == '_seq':
+        elif self.is_wildcard_seq:
             return 'WildcardSeq()'
 
-        elif self.constructor.startswith('literal_'):
+        elif self.is_literal:
             return f'Literal({self.constructor[len("literal_"):]})'
 
-        elif self.constructor == 'or':
+        elif self.is_or:
             return f'Or({", ".join(str(arg) for arg in self.args)})'
 
-        elif self.constructor.startswith('sequence_'):
+        elif self.is_sequence:
             return f'Sequence({", ".join(str(arg) for arg in self.args)})'
 
-        elif self.constructor.startswith('map_'):
+        elif self.is_map:
             return f'Map({", ".join(str(arg) for arg in self.args)})'
 
-        elif self.constructor.startswith('custom_class_'):
+        elif self.is_custom_class:
             name = self.constructor[len('custom_class_'):]
 
             args_str = ', '.join(str(arg) for arg in self.args)

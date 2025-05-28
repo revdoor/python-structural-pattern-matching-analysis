@@ -52,3 +52,27 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
     else:
         # unknown pattern type
         raise ValueError(f"Unsupported pattern: {type(pattern)}")
+
+
+def convert_pattern_matrix(match_node: ast.Match) -> PatternMatrix:
+    subject_node = match_node.subject
+
+    width = len(subject_node.elts) if isinstance(subject_node, ast.Tuple) else 1
+
+    pattern_matrix: PatternMatrix = []
+
+    for match_case in match_node.cases:
+        pattern = match_case.pattern
+        pattern_vector = convert_pattern(pattern)
+
+        if width > 1:
+            if not pattern_vector.is_sequence:
+                raise ValueError(f"Expected a sequence pattern for width > 1, got {pattern_vector.constructor} instead")
+            if len(pattern_vector.args) != width:
+                raise ValueError(f"Pattern length {len(pattern_vector.args)} does not match width {width}")
+
+            pattern_matrix.append(pattern_vector.args)
+        else:  # width == 1
+            pattern_matrix.append([pattern_vector])
+
+    return pattern_matrix

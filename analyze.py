@@ -1,6 +1,6 @@
 import argparse
 import ast
-from pattern_converter import convert_pattern
+from pattern_converter import convert_pattern, convert_pattern_matrix
 
 
 if __name__ == '__main__':
@@ -22,9 +22,16 @@ if __name__ == '__main__':
     print(ast.dump(root, indent=4))
 
     for node in ast.walk(root):
-        if isinstance(node, ast.pattern):
+        # if isinstance(node, ast.pattern):
+        #     try:
+        #         pattern = convert_pattern(node)
+        #         print(f"Converted pattern: {pattern}")
+        #     except Exception as e:
+        #         print(f"Error converting pattern {node}: {e}")
+
+        if isinstance(node, ast.Match):
             try:
-                pattern = convert_pattern(node)
-                print(f"Converted pattern: {pattern}")
+                pattern_matrix = convert_pattern_matrix(node)
+                print(f"Converted pattern matrix: {pattern_matrix}")
             except Exception as e:
-                print(f"Error converting pattern {node}: {e}")
+                print(f"Error converting match node {node}: {e}")
