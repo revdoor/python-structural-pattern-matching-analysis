@@ -1,5 +1,6 @@
 import ast
 from patterns import *
+from todo_error import TodoError
 
 
 def _extract_literal_value(node: ast.expr):
@@ -22,6 +23,7 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
     elif isinstance(pattern, ast.MatchAs):
         if pattern.name is None:
             return Pattern.wildcard()
+        raise TodoError("MatchAs with name is not supported yet")
     else:
         # unknown pattern type
         raise ValueError(f"Unsupported pattern: {type(pattern)}")
