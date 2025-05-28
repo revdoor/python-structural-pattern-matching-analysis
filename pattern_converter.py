@@ -20,7 +20,7 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
         elements = [convert_pattern(pattern) for pattern in pattern.patterns]
         return Pattern.sequence(elements)
     elif isinstance(pattern, ast.MatchAs):
-        if pattern.pattern is None:
+        if pattern.name is None:
             return Pattern.wildcard()
     else:
         # unknown pattern type
