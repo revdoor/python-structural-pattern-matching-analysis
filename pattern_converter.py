@@ -41,6 +41,14 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
         values = [convert_pattern(value) for value in pattern.patterns]
         return Pattern.map(keys, values)
 
+    elif isinstance(pattern, ast.MatchClass):
+        name = pattern.cls.id if isinstance(pattern.cls, ast.Name) else ast.unparse(pattern.cls)
+        args = [convert_pattern(attr) for attr in pattern.patterns]
+        keys = pattern.kwd_attrs
+        values = [convert_pattern(pattern) for pattern in pattern.kwd_patterns]
+        kwargs = {key: value for key, value in zip(keys, values)}
+        return Pattern.custom_class(name, args, kwargs)
+
     else:
         # unknown pattern type
         raise ValueError(f"Unsupported pattern: {type(pattern)}")

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict, Tuple
 import ast
 
 
@@ -7,6 +7,7 @@ import ast
 class Pattern:
     constructor: str
     args: List['Pattern']
+    kwargs: Dict[str, 'Pattern'] = None
 
     @classmethod
     def wildcard(cls):
@@ -35,19 +36,36 @@ class Pattern:
         args = [item for pair in zip(keys, values) for item in pair]
         return cls(constructor=f'map_{len(keys)}', args=args)
 
+    @classmethod
+    def custom_class(cls, name: str, args: List['Pattern'], kwargs: Dict[str, 'Pattern']):
+        return cls(constructor=f'custom_class_{name}', args=args, kwargs=kwargs)
+
     def __str__(self):
         if self.constructor == '_':
             return 'Wildcard()'
+
         elif self.constructor == '_seq':
             return 'WildcardSeq()'
+
         elif self.constructor.startswith('literal_'):
             return f'Literal({self.constructor[len("literal_"):]})'
+
         elif self.constructor == 'or':
             return f'Or({", ".join(str(arg) for arg in self.args)})'
+
         elif self.constructor.startswith('sequence_'):
             return f'Sequence({", ".join(str(arg) for arg in self.args)})'
+
         elif self.constructor.startswith('map_'):
             return f'Map({", ".join(str(arg) for arg in self.args)})'
+
+        elif self.constructor.startswith('custom_class_'):
+            name = self.constructor[len('custom_class_'):]
+
+            args_str = ', '.join(str(arg) for arg in self.args)
+            kwargs_str = ', '.join(f'{k}={v}' for k, v in self.kwargs.items()) if self.kwargs else ''
+
+            return f'CustomClass({name}, {args_str}, {kwargs_str})'
         else:
             return f'{self.constructor}({", ".join(str(arg) for arg in self.args)})'
 

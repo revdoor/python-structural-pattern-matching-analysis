@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     root = ast.parse(code)
 
-    with open('ast_dump.txt', 'w') as f:
+    with open(f'ast_dump_{target.split(".")[0]}.txt', 'w') as f:
         f.write(ast.dump(root, indent=4))
 
     print(ast.dump(root, indent=4))
