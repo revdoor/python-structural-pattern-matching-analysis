@@ -20,6 +20,10 @@ class Pattern:
     def or_pattern(cls, left: 'Pattern', right: 'Pattern'):
         return cls(constructor='or', args=[left, right])
 
+    @classmethod
+    def sequence(cls, elements: List['Pattern']):
+        return cls(constructor=f'sequence_{len(elements)}', args=elements)
+
 
 PatternMatrix = List[List[Pattern]]
 PatternVector = List[Pattern]
