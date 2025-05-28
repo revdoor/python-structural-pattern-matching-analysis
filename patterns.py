@@ -24,6 +24,18 @@ class Pattern:
     def sequence(cls, elements: List['Pattern']):
         return cls(constructor=f'sequence_{len(elements)}', args=elements)
 
+    def __str__(self):
+        if self.constructor == '_':
+            return 'Wildcard()'
+        elif self.constructor.startswith('literal_'):
+            return f'Literal({self.constructor[len("literal_"):]})'
+        elif self.constructor == 'or':
+            return f'Or({", ".join(str(arg) for arg in self.args)})'
+        elif self.constructor.startswith('sequence_'):
+            return f'Sequence({", ".join(str(arg) for arg in self.args)})'
+        else:
+            return f'{self.constructor}({", ".join(str(arg) for arg in self.args)})'
+
 
 PatternMatrix = List[List[Pattern]]
 PatternVector = List[Pattern]

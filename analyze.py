@@ -1,5 +1,6 @@
 import argparse
 import ast
+from pattern_converter import convert_pattern
 
 
 if __name__ == '__main__':
@@ -16,3 +17,11 @@ if __name__ == '__main__':
     root = ast.parse(code)
 
     print(ast.dump(root, indent=4))
+
+    for node in ast.walk(root):
+        if isinstance(node, ast.pattern):
+            try:
+                pattern = convert_pattern(node)
+                print(f"Converted pattern: {pattern}")
+            except Exception as e:
+                print(f"Error converting pattern {node}: {e}")
