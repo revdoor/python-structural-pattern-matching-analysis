@@ -13,6 +13,10 @@ class Pattern:
         return cls(constructor='_', args=[])
 
     @classmethod
+    def wildcard_seq(cls):
+        return cls(constructor='_seq', args=[])
+
+    @classmethod
     def literal(cls, value):
         return cls(constructor=f'literal_{value}', args=[])
 
@@ -34,6 +38,8 @@ class Pattern:
     def __str__(self):
         if self.constructor == '_':
             return 'Wildcard()'
+        elif self.constructor == '_seq':
+            return 'WildcardSeq()'
         elif self.constructor.startswith('literal_'):
             return f'Literal({self.constructor[len("literal_"):]})'
         elif self.constructor == 'or':

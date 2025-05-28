@@ -32,8 +32,9 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
 
     elif isinstance(pattern, ast.MatchStar):
         # MatchStar matches the rest of the sequence in a variable length match sequence pattern
-        # This is syntactically similar to a wildcard
-        return Pattern.wildcard()
+        # This is syntactically similar to a sequence of wildcards with variable-length
+        # To properly analyze overall matching, we treat it as a wildcard sequence
+        return Pattern.wildcard_seq()
 
     elif isinstance(pattern, ast.MatchMapping):
         keys = [_extract_literal_value(key) for key in pattern.keys]
