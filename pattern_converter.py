@@ -21,9 +21,11 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
         elements = [convert_pattern(pattern) for pattern in pattern.patterns]
         return Pattern.sequence(elements)
     elif isinstance(pattern, ast.MatchAs):
-        if pattern.name is None:
+        if pattern.pattern is None:
+            # MatchAs without a pattern is either a wildcard or a variable binding
+            # When analyzing, the variable binding can be treated as a wildcard
             return Pattern.wildcard()
-        raise TodoError("MatchAs with name is not supported yet")
+        return convert_pattern(pattern.pattern)
     else:
         # unknown pattern type
         raise ValueError(f"Unsupported pattern: {type(pattern)}")

@@ -24,10 +24,24 @@ def matching_test(x: int, y: str):
             print("c is {x: 1, y: 'a'}")
         case {"x": 2, "y": "b"}:
             print("c is {x: 2, y: 'b'}")
-        case {"x": _, "y": _}:
-            print(f"c is {{x: {c['x']}, y: {c['y']}}}")
+        case {"x": x, "y": y} if x > 2 and y != "b":
+            print(f"c is {{x: {x}, y: {y}}}")
         case _:
             print("c is something else")
+
+    d = [1, 2]
+
+    match d:
+        case []:
+            print("d is an empty list")
+        case [1, 2]:
+            print("d is a list with 1 and 2")
+        case [x, y]:
+            print(f"d is a list with {x} and {y}")
+        case [x, y, *rest]:
+            print(f"d is a list with {x}, {y}, and the rest: {rest}")
+        case _:
+            print("d is something else")
 
 
 matching_test(2, "b")
