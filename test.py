@@ -55,5 +55,25 @@ def matching_test(x: int, y: str):
         case _:
             print("x is something else and y is something else")
 
+    match x:
+        case 1 | 2:
+            print(f"x is {x}")
+        case 1:
+            print("x is one")
+        case 2:
+            print("x is two")
+        case _:
+            print("x is something else")
+
+    match x:
+        case int():
+            print("Matched an integer")
+        case y if isinstance(y, str):
+            print(f"Matched a value: {y}")
+        case 2:
+            print("Matched the integer 2")
+        case _:
+            print("Matched something else")
+
 
 matching_test(2, "b")
