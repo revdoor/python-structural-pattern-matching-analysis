@@ -10,6 +10,10 @@ class Pattern:
     kwargs: Dict[str, 'Pattern'] = None
 
     @classmethod
+    def empty(cls):
+        return cls(constructor='empty', args=[])
+
+    @classmethod
     def wildcard(cls):
         return cls(constructor='_', args=[])
 
@@ -41,6 +45,10 @@ class Pattern:
         return cls(constructor=f'custom_class_{name}', args=args, kwargs=kwargs)
 
     @property
+    def is_empty(self):
+        return self.constructor == 'empty'
+
+    @property
     def is_wildcard(self):
         return self.constructor == '_'
 
@@ -69,7 +77,10 @@ class Pattern:
         return self.constructor.startswith('custom_class_')
 
     def __str__(self):
-        if self.is_wildcard:
+        if self.is_empty:
+            return 'Empty()'
+
+        elif self.is_wildcard:
             return 'Wildcard()'
 
         elif self.is_wildcard_seq:

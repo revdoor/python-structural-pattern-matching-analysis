@@ -57,7 +57,10 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
 def convert_pattern_matrix(match_node: ast.Match) -> PatternMatrix:
     subject_node = match_node.subject
 
-    width = len(subject_node.elts) if isinstance(subject_node, ast.Tuple) else 1
+    if isinstance(subject_node, ast.Tuple) or isinstance(subject_node, ast.List):
+        width = len(subject_node.elts)
+    else:  # only a single subject
+        width = 1
 
     pattern_matrix: PatternMatrix = []
 
@@ -66,12 +69,15 @@ def convert_pattern_matrix(match_node: ast.Match) -> PatternMatrix:
         pattern_vector = convert_pattern(pattern)
 
         if width > 1:
-            if not pattern_vector.is_sequence:
-                raise ValueError(f"Expected a sequence pattern for width > 1, got {pattern_vector.constructor} instead")
-            if len(pattern_vector.args) != width:
-                raise ValueError(f"Pattern length {len(pattern_vector.args)} does not match width {width}")
-
-            pattern_matrix.append(pattern_vector.args)
+            if pattern_vector.is_sequence:
+                if len(pattern_vector.args) != width:  # useless clause
+                    pattern_matrix.append([Pattern.empty()] * width)
+                else:
+                    pattern_matrix.append(pattern_vector.args)
+            elif pattern_vector.is_wildcard:
+                pattern_matrix.append([Pattern.wildcard()] * width)
+            else:  # useless clause
+                pattern_matrix.append([Pattern.empty()] * width)
         else:  # width == 1
             pattern_matrix.append([pattern_vector])
 
