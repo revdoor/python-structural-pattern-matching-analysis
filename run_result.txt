@@ -33,6 +33,25 @@ Module(
                                         args=[
                                             Constant(value='x is two')]))]),
                         match_case(
+                            pattern=MatchAs(name='x'),
+                            guard=Compare(
+                                left=Name(id='x', ctx=Load()),
+                                ops=[
+                                    Gt()],
+                                comparators=[
+                                    Constant(value=2)]),
+                            body=[
+                                Expr(
+                                    value=Call(
+                                        func=Name(id='print', ctx=Load()),
+                                        args=[
+                                            JoinedStr(
+                                                values=[
+                                                    Constant(value='x is greater than 2: '),
+                                                    FormattedValue(
+                                                        value=Name(id='x', ctx=Load()),
+                                                        conversion=-1)])]))]),
+                        match_case(
                             pattern=MatchAs(),
                             body=[
                                 Expr(
@@ -44,14 +63,21 @@ Module(
                     subject=Name(id='y', ctx=Load()),
                     cases=[
                         match_case(
-                            pattern=MatchValue(
-                                value=Constant(value='a')),
+                            pattern=MatchAs(
+                                pattern=MatchValue(
+                                    value=Constant(value='a')),
+                                name='a'),
                             body=[
                                 Expr(
                                     value=Call(
                                         func=Name(id='print', ctx=Load()),
                                         args=[
-                                            Constant(value='y is a')]))]),
+                                            JoinedStr(
+                                                values=[
+                                                    Constant(value='y is '),
+                                                    FormattedValue(
+                                                        value=Name(id='a', ctx=Load()),
+                                                        conversion=-1)])]))]),
                         match_case(
                             pattern=MatchValue(
                                 value=Constant(value='b')),

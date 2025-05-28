@@ -4,12 +4,14 @@ def matching_test(x: int, y: str):
             print("x is one")
         case 2:
             print("x is two")
+        case x if x > 2:
+            print(f"x is greater than 2: {x}")
         case _:
             print("x is something else")
 
     match y:
-        case "a":
-            print("y is a")
+        case "a" as a:
+            print(f"y is {a}")
         case "b":
             print("y is b")
         case _:
