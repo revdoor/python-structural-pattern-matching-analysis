@@ -6,7 +6,7 @@ import ast
 @dataclass
 class Pattern:
     constructor: str
-    args: List['Pattern']
+    args: List['Pattern'] = None
     kwargs: Dict[str, 'Pattern'] = None
 
     @classmethod
@@ -26,23 +26,22 @@ class Pattern:
         return cls(constructor=f'literal_{value}', args=[])
 
     @classmethod
-    def or_pattern(cls, left: 'Pattern', right: 'Pattern'):
-        return cls(constructor='or', args=[left, right])
+    def or_pattern(cls, args: List['Pattern']):
+        return cls(constructor='or', args=args)
 
     @classmethod
     def sequence(cls, elements: List['Pattern']):
         return cls(constructor=f'sequence_{len(elements)}', args=elements)
 
     @classmethod
-    def map(cls, keys: List['Pattern'], values: List['Pattern']):
+    def map(cls, keys: List[str], values: List['Pattern']):
         if len(keys) != len(values):
             raise ValueError("Keys and values must have the same length")
-        args = [item for pair in zip(keys, values) for item in pair]
-        return cls(constructor=f'map_{len(keys)}', args=args)
+        return cls(constructor=f'map_{len(keys)}', kwargs={k: v for k, v in zip(keys, values)})
 
     @classmethod
-    def custom_class(cls, name: str, args: List['Pattern'], kwargs: Dict[str, 'Pattern']):
-        return cls(constructor=f'custom_class_{name}', args=args, kwargs=kwargs)
+    def object(cls, name: str, args: List['Pattern'], kwargs: Dict[str, 'Pattern']):
+        return cls(constructor=f'object_{name}', args=args, kwargs=kwargs)
 
     @property
     def is_empty(self):
@@ -73,8 +72,8 @@ class Pattern:
         return self.constructor.startswith('map_')
 
     @property
-    def is_custom_class(self):
-        return self.constructor.startswith('custom_class_')
+    def is_object(self):
+        return self.constructor.startswith('object_')
 
     def __str__(self):
         if self.is_empty:
@@ -96,15 +95,16 @@ class Pattern:
             return f'Sequence({", ".join(str(arg) for arg in self.args)})'
 
         elif self.is_map:
-            return f'Map({", ".join(str(arg) for arg in self.args)})'
+            items_str = ', '.join(f'{k}: {v}' for k, v in self.kwargs.items())
+            return f'Map({items_str})'
 
-        elif self.is_custom_class:
-            name = self.constructor[len('custom_class_'):]
+        elif self.is_object:
+            name = self.constructor[len('object_'):]
 
-            args_str = ', '.join(str(arg) for arg in self.args)
+            args_str = ', '.join(str(arg) for arg in self.args) if self.args else ''
             kwargs_str = ', '.join(f'{k}={v}' for k, v in self.kwargs.items()) if self.kwargs else ''
 
-            return f'CustomClass({name}, {args_str}, {kwargs_str})'
+            return f'Object({name}, {args_str}, {kwargs_str})'
         else:
             return f'{self.constructor}({", ".join(str(arg) for arg in self.args)})'
 

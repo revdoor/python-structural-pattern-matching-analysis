@@ -32,6 +32,11 @@ if __name__ == '__main__':
         if isinstance(node, ast.Match):
             try:
                 pattern_matrix = convert_pattern_matrix(node)
-                print(f"Converted pattern matrix: {pattern_matrix}")
+
+                print(f"Converted pattern matrix")
+                for line in pattern_matrix:
+                    print(f'[{", ".join(str(p) for p in line)}]')
+                print()
             except Exception as e:
                 print(f"Error converting match node {node}: {e}")
+                print()

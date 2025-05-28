@@ -14,6 +14,10 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
         value = _extract_literal_value(pattern.value)
         return Pattern.literal(value)
 
+    elif isinstance(pattern, ast.MatchOr):
+        args = [convert_pattern(p) for p in pattern.patterns]
+        return Pattern.or_pattern(args)
+
     elif isinstance(pattern, ast.MatchSingleton):
         # MatchSingleton handles only None, True, or False
         value = pattern.value
@@ -47,7 +51,7 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
         keys = pattern.kwd_attrs
         values = [convert_pattern(pattern) for pattern in pattern.kwd_patterns]
         kwargs = {key: value for key, value in zip(keys, values)}
-        return Pattern.custom_class(name, args, kwargs)
+        return Pattern.object(name, args, kwargs)
 
     else:
         # unknown pattern type
