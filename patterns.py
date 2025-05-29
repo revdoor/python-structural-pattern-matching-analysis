@@ -124,6 +124,12 @@ class Pattern:
         else:
             return f'{self.constructor}({", ".join(str(arg) for arg in self.args)})'
 
+    def extend(self, other: List['Pattern']) -> List['Pattern']:
+        if self.is_sequence:
+            return self.args + other
+        else:
+            return [self] + other
+
 
 class PatternVector:
     def __init__(self, patterns: List[Pattern], guard: Optional[ast.AST] = None):

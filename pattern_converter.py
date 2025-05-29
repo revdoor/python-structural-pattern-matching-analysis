@@ -16,6 +16,7 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
         return Pattern.literal(value)
 
     elif isinstance(pattern, ast.MatchOr):
+        print(f"Converting MatchOr pattern: {ast.unparse(pattern)}")
         args = [convert_pattern(p) for p in pattern.patterns]
         return Pattern.or_pattern(args)
 
@@ -92,6 +93,8 @@ def convert_pattern_matrix(match_node: ast.Match) -> PatternMatrix:
                     row = pattern_vector.args
             elif pattern_vector.is_wildcard:
                 row = [Pattern.wildcard()] * width
+            elif pattern_vector.is_or:
+                row = [pattern_vector]
             else:  # useless clause
                 row = [Pattern.empty()] * width
         else:  # width == 1

@@ -27,10 +27,17 @@ def _urec_inductive(matrix: PatternMatrix, pattern_vector: PatternVector) -> boo
 
 def _handle_constructed(matrix: PatternMatrix, pattern_vector: PatternVector) -> bool:
     constructor = pattern_vector[0].constructor
+    # print(f"Handling constructed pattern: {constructor}")
     arity = len(pattern_vector[0].args) if pattern_vector[0].args else 0
+    # print(f"Arity of the constructor: {arity}")
 
     specialized_matrix = specialize_matrix(constructor, arity, matrix)
     specialized_vector = specialize_pattern_vector(constructor, arity, pattern_vector)
+
+    # print(f"Specialized matrix:")
+    # for row in specialized_matrix:
+    #     print(row)
+    # print(f"Specialized vector: {specialized_vector}")
 
     return _urec(specialized_matrix, specialized_vector)
 
@@ -102,9 +109,10 @@ def _handle_incomplete_signature(
 def _handle_or(matrix: PatternMatrix, pattern_vector: PatternVector) -> bool:
     for alternative in pattern_vector[0].args:
         guard = pattern_vector.guard
-        specialized_vector = PatternVector([alternative] + pattern_vector[1:], guard)
 
-        if _urec(matrix, specialized_vector):
+        new_pattern_vector = PatternVector(alternative.extend(pattern_vector[1:]), guard)
+
+        if _urec(matrix, new_pattern_vector):
             return True
 
     return False
@@ -156,7 +164,7 @@ def specialize_matrix(constructor: str, arity: int, matrix: PatternMatrix) -> Pa
             specialized_rows = []
 
             for alternative in first.args:
-                temp_row = PatternVector([alternative] + rest, guard)
+                temp_row = PatternVector(alternative.extend(rest), guard)
                 specialized_rows.extend(get_specialized_rows(temp_row))
 
             return specialized_rows
@@ -221,9 +229,9 @@ def check_useless_patterns(matrix: PatternMatrix):
         current_row = matrix[i]
 
         if not is_useful(partial_matrix, current_row):
-            print(f"! Row {i} is useless: {current_row}")
+            print(f"! {i+1}th pattern is useless")
         else:
-            print(f"* Row {i} is useful: {current_row}")
+            print(f"* {i+1}th pattern is useful")
 
 
 def check_non_exhaustive_matches(matrix: PatternMatrix):
