@@ -27,17 +27,10 @@ def _urec_inductive(matrix: PatternMatrix, pattern_vector: PatternVector) -> boo
 
 def _handle_constructed(matrix: PatternMatrix, pattern_vector: PatternVector) -> bool:
     constructor = pattern_vector[0].constructor
-    # print(f"Handling constructed pattern: {constructor}")
     arity = len(pattern_vector[0].args) if pattern_vector[0].args else 0
-    # print(f"Arity of the constructor: {arity}")
 
     specialized_matrix = specialize_matrix(constructor, arity, matrix)
     specialized_vector = specialize_pattern_vector(constructor, arity, pattern_vector)
-
-    # print(f"Specialized matrix:")
-    # for row in specialized_matrix:
-    #     print(row)
-    # print(f"Specialized vector: {specialized_vector}")
 
     return _urec(specialized_matrix, specialized_vector)
 
