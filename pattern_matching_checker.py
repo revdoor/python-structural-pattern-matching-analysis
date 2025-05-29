@@ -21,6 +21,8 @@ def _urec_inductive(matrix: PatternMatrix, pattern_vector: PatternVector) -> boo
         return _handle_wildcard(matrix, pattern_vector)
     elif first_pattern.is_or:
         return _handle_or(matrix, pattern_vector)
+    else:  # non-handled case; temporarily return False
+        return False
 
 
 def _handle_constructed(matrix: PatternMatrix, pattern_vector: PatternVector) -> bool:
@@ -46,7 +48,7 @@ def collect_constructor_and_arity_from_first_column(matrix: PatternMatrix) -> Di
     constructors = dict()
 
     for row in matrix:
-        if not row:
+        if row.is_empty:
             continue
 
         first = row[0]
@@ -109,7 +111,7 @@ def default_matrix(matrix: PatternMatrix) -> PatternMatrix:
     result = []
 
     for row in matrix:
-        if not row:
+        if row.is_empty:
             continue
 
         first = row[0]
@@ -127,23 +129,24 @@ def default_matrix(matrix: PatternMatrix) -> PatternMatrix:
 
 
 def specialize_matrix(constructor: str, arity: int, matrix: PatternMatrix) -> PatternMatrix:
-    def get_specialized_rows(row: List[Pattern]) -> PatternMatrix:
-        if not row:
+    def get_specialized_rows(row: PatternVector) -> PatternMatrix:
+        if row.is_empty:
             return []
 
         first = row[0]
         rest = row[1:]
+        guard = row.guard
 
         if first.constructor == constructor:
             if first.args:
                 specialized_row = first.args + rest
             else:
                 specialized_row = rest
-            return [specialized_row]
+            return [PatternVector(specialized_row, guard)]
 
         elif first.is_wildcard:
             specialized_row = [Pattern.wildcard()] * arity + rest
-            return [specialized_row]
+            return [PatternVector(specialized_row, guard)]
 
         elif first.is_or:
             specialized_rows = []
@@ -168,22 +171,26 @@ def specialize_matrix(constructor: str, arity: int, matrix: PatternMatrix) -> Pa
 
 
 def specialize_pattern_vector(constructor: str, arity: int, pattern_vector: PatternVector) -> PatternVector:
-    if not pattern_vector:
-        return []
+    if pattern_vector.is_empty:
+        return PatternVector([])
 
     first = pattern_vector[0]
     rest = pattern_vector[1:]
+    guard = pattern_vector.guard
 
     if first.constructor == constructor:
         if first.args:
-            return first.args + rest
+            patterns = first.args + rest
         else:
-            return rest
+            patterns = rest
+        return PatternVector(patterns, guard)
+
     elif first.is_wildcard:
         wildcards = [Pattern.wildcard()] * arity
-        return wildcards + rest
+        return PatternVector(wildcards + rest, guard)
+
     else:
-        return []
+        return PatternVector([])
 
 
 def is_complete_signature(constructors: Set[str]) -> bool:
@@ -218,7 +225,7 @@ def check_useless_patterns(matrix: PatternMatrix):
 def check_non_exhaustive_matches(matrix: PatternMatrix):
     arity = len(matrix[0]) if matrix else 0
 
-    if is_useful(matrix, [Pattern.wildcard()] * arity):
+    if is_useful(matrix, PatternVector([Pattern.wildcard()] * arity)):
         print("The match is non-exhaustive. There are patterns that are not covered by the match cases.")
     else:
         print("The match is exhaustive. All possible patterns are covered by the match cases.")

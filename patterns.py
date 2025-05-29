@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict, Tuple
+from typing import List, Dict, Optional
 import ast
 
 
@@ -8,6 +8,7 @@ class Pattern:
     constructor: str
     args: List['Pattern'] = None
     kwargs: Dict[str, 'Pattern'] = None
+    var_name: Optional[str] = None
 
     @classmethod
     def empty(cls):
@@ -20,6 +21,10 @@ class Pattern:
     @classmethod
     def wildcard_seq(cls):
         return cls(constructor='_seq', args=[])
+
+    @classmethod
+    def var_binding(cls, var_name: str):
+        return cls(constructor='var_binding', args=[], var_name=var_name)
 
     @classmethod
     def literal(cls, value):
@@ -49,7 +54,7 @@ class Pattern:
 
     @property
     def is_wildcard(self):
-        return self.constructor == '_'
+        return self.constructor == '_' or self.constructor == 'var_binding'
 
     @property
     def is_wildcard_seq(self):
@@ -79,15 +84,22 @@ class Pattern:
     def is_constructed(self):
         return self.is_literal or self.is_sequence
 
+    @property
+    def is_var_binding(self):
+        return self.constructor == 'var_binding' and self.var_name is not None
+
     def __str__(self):
         if self.is_empty:
             return 'Empty()'
 
-        elif self.is_wildcard:
+        elif self.is_wildcard and not self.is_var_binding:
             return 'Wildcard()'
 
         elif self.is_wildcard_seq:
             return 'WildcardSeq()'
+
+        elif self.is_var_binding:
+            return f'VarBinding({self.var_name})'
 
         elif self.is_literal:
             return f'Literal({self.constructor[len("literal_"):]})'
@@ -113,5 +125,31 @@ class Pattern:
             return f'{self.constructor}({", ".join(str(arg) for arg in self.args)})'
 
 
-PatternMatrix = List[List[Pattern]]
-PatternVector = List[Pattern]
+class PatternVector:
+    def __init__(self, patterns: List[Pattern], guard: Optional[ast.AST] = None):
+        self.patterns = patterns
+        self.guard = guard
+
+    def __len__(self):
+        return len(self.patterns)
+
+    def __getitem__(self, index):
+        return self.patterns[index]
+
+    def __iter__(self):
+        return iter(self.patterns)
+
+    def __str__(self):
+        return f'PatternVector({", ".join(str(pattern) for pattern in self.patterns)})' + \
+                (f' with guard {ast.unparse(self.guard)}' if self.guard else '')
+
+    @property
+    def has_guard(self):
+        return self.guard is not None
+
+    @property
+    def is_empty(self):
+        return len(self.patterns) == 0
+
+
+PatternMatrix = List[PatternVector]

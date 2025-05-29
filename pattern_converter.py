@@ -1,4 +1,5 @@
 import ast
+from copy import deepcopy
 from patterns import *
 from todo_error import TodoError
 
@@ -29,10 +30,19 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
 
     elif isinstance(pattern, ast.MatchAs):
         if pattern.pattern is None:
-            # MatchAs without a pattern is either a wildcard or a variable binding
-            # When analyzing, the variable binding can be treated as a wildcard
-            return Pattern.wildcard()
-        return convert_pattern(pattern.pattern)
+            if pattern.name is None:  # wildcard pattern
+                return Pattern.wildcard()
+            else:  # variable binding
+                # MatchAs without a pattern is either a wildcard or a variable binding
+                # When analyzing, the variable binding can be treated as a wildcard
+                # if there are no guard clauses
+                return Pattern.var_binding(pattern.name)
+
+        base_pattern = convert_pattern(pattern.pattern)
+        if pattern.name is not None:
+            # If there's a variable name, we treat it as a variable binding
+            base_pattern.var_name = pattern.name
+        return base_pattern
 
     elif isinstance(pattern, ast.MatchStar):
         # MatchStar matches the rest of the sequence in a variable length match sequence pattern
@@ -72,17 +82,21 @@ def convert_pattern_matrix(match_node: ast.Match) -> PatternMatrix:
         pattern = match_case.pattern
         pattern_vector = convert_pattern(pattern)
 
+        guard = match_case.guard
+
         if width > 1:
             if pattern_vector.is_sequence:
                 if len(pattern_vector.args) != width:  # useless clause
-                    pattern_matrix.append([Pattern.empty()] * width)
+                    row = [Pattern.empty()] * width
                 else:
-                    pattern_matrix.append(pattern_vector.args)
+                    row = pattern_vector.args
             elif pattern_vector.is_wildcard:
-                pattern_matrix.append([Pattern.wildcard()] * width)
+                row = [Pattern.wildcard()] * width
             else:  # useless clause
-                pattern_matrix.append([Pattern.empty()] * width)
+                row = [Pattern.empty()] * width
         else:  # width == 1
-            pattern_matrix.append([pattern_vector])
+            row = [pattern_vector]
+
+        pattern_matrix.append(PatternVector(row, deepcopy(guard)))
 
     return pattern_matrix
