@@ -93,14 +93,17 @@ def _handle_incomplete_signature(
         matrix: PatternMatrix, pattern_vector: PatternVector, constructor_arity_dict: Dict[str, int]) -> bool:
     default_mat = default_matrix(matrix)
 
-    rest_vec = pattern_vector[1:]
+    guard = pattern_vector.guard
+    rest_vec = PatternVector(pattern_vector[1:], guard)
 
     return _urec(default_mat, rest_vec)
 
 
 def _handle_or(matrix: PatternMatrix, pattern_vector: PatternVector) -> bool:
     for alternative in pattern_vector[0].args:
-        specialized_vector = [alternative] + pattern_vector[1:]
+        guard = pattern_vector.guard
+        specialized_vector = PatternVector([alternative] + pattern_vector[1:], guard)
+
         if _urec(matrix, specialized_vector):
             return True
 
@@ -116,13 +119,14 @@ def default_matrix(matrix: PatternMatrix) -> PatternMatrix:
 
         first = row[0]
         rest = row[1:]
+        guard = row.guard
 
         if first.is_wildcard:
-            result.append(rest)
+            result.append(PatternVector(rest, guard))
         elif first.is_or:
             for alternative in first.args:
                 if alternative.is_wildcard:
-                    result.append(rest)
+                    result.append(PatternVector(rest, guard))
                     break
 
     return result
@@ -152,7 +156,7 @@ def specialize_matrix(constructor: str, arity: int, matrix: PatternMatrix) -> Pa
             specialized_rows = []
 
             for alternative in first.args:
-                temp_row = [alternative] + rest
+                temp_row = PatternVector([alternative] + rest, guard)
                 specialized_rows.extend(get_specialized_rows(temp_row))
 
             return specialized_rows
