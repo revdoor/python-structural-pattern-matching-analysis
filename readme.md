@@ -45,6 +45,10 @@ Checking pattern matching in line 16:
 The match is exhaustive. All possible patterns are covered by the match cases.
 ```
 
+## TODO
+
+- Need to handle the pattern guards as well as custom classes.
+
 ### ETC
 
 This repository is for team assignment in the course "CS453 Automated Software Testing" in 2025 Spring at KAIST.
