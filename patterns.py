@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 import ast
-from z3 import *
+import z3
 from union_var import UnionVar
 
 
@@ -132,22 +132,22 @@ class MatchPattern:
         else:
             return [self] + other
 
-    def convert_to_condition(self, union_var: UnionVar, union_vars: Optional[List[UnionVar]] = None) -> Bool:
+    def convert_to_condition(self, union_var: UnionVar, union_vars: Optional[List[UnionVar]] = None):
         if self.is_empty:  # empty pattern, never matches
-            return BoolVal(False)
+            return z3.BoolVal(False)
         elif self.is_wildcard:  # wildcard matches anything
-            return BoolVal(True)
+            return z3.BoolVal(True)
         elif self.is_literal:  # literal matches specific value
             value = ast.literal_eval(self.constructor[len('literal_'):])
             return union_var == value
         elif self.is_or:
             compares = [arg.convert_to_condition(union_var, union_vars=union_vars) for arg in self.args]
-            return Or(*compares)
+            return z3.Or(*compares)
         elif self.is_sequence:
             if union_vars is None or len(union_vars) != len(self.args):
                 raise ValueError("Union variables must be provided for sequence patterns")
             compares = [arg.convert_to_condition(union_vars[i]) for i, arg in enumerate(self.args)]
-            return And(*compares)
+            return z3.And(*compares)
         else:
             raise NotImplementedError(f'Pattern conversion not implemented for {self.constructor} type')
 

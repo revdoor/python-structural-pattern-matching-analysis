@@ -60,7 +60,7 @@ def collect_constructor_and_arity_from_first_column(matrix: PatternMatrix) -> Di
     return constructors
 
 
-def extract_constructor_and_arity(pattern: Pattern) -> Dict[str, int]:
+def extract_constructor_and_arity(pattern: MatchPattern) -> Dict[str, int]:
     if pattern.is_literal:
         return {pattern.constructor: 0}
 
@@ -244,11 +244,11 @@ def find_test_case(pattern_matrix: PatternMatrix, pattern_vector: PatternVector,
     for i in range(len(pattern_matrix)):
         row = pattern_matrix[i]
 
-        solver.add(Not(condition_expr_from_pattern_vector(row, union_vars)))
+        solver.add(z3.Not(condition_expr_from_pattern_vector(row, union_vars)))
 
     solver.add(condition_expr_from_pattern_vector(pattern_vector, union_vars))
 
-    if solver.check() == sat:
+    if solver.check() == z3.sat:
         model = solver.model()
 
         test_case = []
