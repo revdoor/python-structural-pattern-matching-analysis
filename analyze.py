@@ -1,6 +1,6 @@
 import argparse
 import ast
-from pattern_converter import convert_pattern, convert_pattern_matrix, get_subjects
+from pattern_converter import convert_pattern, convert_pattern_matrix, get_subjects, get_line_no
 from pattern_matching_checker import *
 
 
@@ -20,29 +20,17 @@ if __name__ == '__main__':
     with open(f'ast_dump_{target.split(".")[0]}.txt', 'w') as f:
         f.write(ast.dump(root, indent=4))
 
-    # print(ast.dump(root, indent=4))
-
     for node in ast.walk(root):
-        # if isinstance(node, ast.pattern):
-        #     try:
-        #         pattern = convert_pattern(node)
-        #         print(f"Converted pattern: {pattern}")
-        #     except Exception as e:
-        #         print(f"Error converting pattern {node}: {e}")
-
         if isinstance(node, ast.Match):
-            # try:
-            pattern_matrix = convert_pattern_matrix(node)
-            subjects = get_subjects(node)
+            print(f"Checking pattern matching in line {node.lineno}:")
+            try:
+                pattern_matrix = convert_pattern_matrix(node)
+                subjects = get_subjects(node)
+                line_no_list = get_line_no(node)
 
-            print(f"Converted pattern matrix")
-            for line in pattern_matrix:
-                print(f'[{", ".join(str(p) for p in line)}]')
-            print()
-
-            check_useless_patterns(pattern_matrix, subjects)
-            check_non_exhaustive_matches(pattern_matrix, subjects)
-            print()
-            # except Exception as e:
-            #     print(f"Error converting match node {node}: {e}")
-            #     print()
+                check_useless_patterns(pattern_matrix, subjects, line_no_list)
+                check_non_exhaustive_matches(pattern_matrix, subjects)
+                print()
+            except Exception as e:
+                print(f"Error converting match node {node}: {e}")
+                print()

@@ -16,7 +16,6 @@ def convert_pattern(pattern: ast.pattern) -> MatchPattern:
         return MatchPattern.literal(value)
 
     elif isinstance(pattern, ast.MatchOr):
-        print(f"Converting MatchOr pattern: {ast.unparse(pattern)}")
         args = [convert_pattern(p) for p in pattern.patterns]
         return MatchPattern.or_pattern(args)
 
@@ -114,3 +113,12 @@ def get_subjects(match_node: ast.Match):
         subjects = [subject_node.id]
 
     return subjects
+
+
+def get_line_no(match_node: ast.Match):
+    line_no_list = []
+
+    for match_case in match_node.cases:
+        line_no_list.append(match_case.pattern.lineno)
+
+    return line_no_list
