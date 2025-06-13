@@ -9,6 +9,11 @@ It provides an analysis of the useless patterns, as well as non-exhaustive match
 For the useful patterns, it also provides some example values that match with the pattern.  
 For the non-exhaustive matches, it provides some example values that is not covered with the pattern.
 
+## Requirements
+
+- Python 3.10 or later (for structural pattern matching)
+- z3 module for finding test cases
+
 ## Usage
 
 ```
