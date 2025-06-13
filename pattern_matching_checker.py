@@ -1,6 +1,6 @@
 from patterns import *
 from typing import Set, Dict
-from z3 import *
+import z3
 from union_var import TYPE_INT, TYPE_BOOL, TYPE_STRING, UnionVar
 
 
@@ -230,13 +230,13 @@ def condition_expr_from_pattern_vector(pattern_vector: PatternVector, union_vars
         condition = pattern.convert_to_condition(union_vars[i], union_vars=union_vars)  # union_vars[i] is the relevant UnionVar
         conditions.append(condition)
 
-    return And(*conditions)
+    return z3.And(*conditions)
 
 
 def find_test_case(pattern_matrix: PatternMatrix, pattern_vector: PatternVector, arity):
     union_vars = [UnionVar(f'var_{i}') for i in range(arity)]
 
-    solver = Solver()
+    solver = z3.Solver()
 
     for var in union_vars:
         solver.add(var.default_constraints())

@@ -1,4 +1,4 @@
-from z3 import *
+import z3
 
 
 TYPE_INT = 0
@@ -10,10 +10,10 @@ class UnionVar:
     def __init__(self, name: str):
         self.name = name
 
-        self.type_var = Int(f'{name}_type')
-        self.int_var = Int(f'{name}_int')
-        self.bool_var = Bool(f'{name}_bool')
-        self.string_var = String(f'{name}_string')
+        self.type_var = z3.Int(f'{name}_type')
+        self.int_var = z3.Int(f'{name}_int')
+        self.bool_var = z3.Bool(f'{name}_bool')
+        self.string_var = z3.String(f'{name}_string')
 
     def get_int_var(self):
         return self.int_var
@@ -28,30 +28,30 @@ class UnionVar:
         return self.type_var
 
     def type_validity(self):
-        return Or(self.type_var == TYPE_INT,
+        return z3.Or(self.type_var == TYPE_INT,
                   self.type_var == TYPE_BOOL,
                   self.type_var == TYPE_STRING)
 
     def default_constraints(self):
         constraints = [self.type_validity(),
-                       Implies(self.type_var != TYPE_INT, self.int_var == 0),
-                       Implies(self.type_var != TYPE_BOOL, self.bool_var == False),
-                       Implies(self.type_var != TYPE_STRING, self.string_var == "")]
+                       z3.Implies(self.type_var != TYPE_INT, self.int_var == 0),
+                       z3.Implies(self.type_var != TYPE_BOOL, self.bool_var == False),
+                       z3.Implies(self.type_var != TYPE_STRING, self.string_var == "")]
 
-        return And(*constraints)
+        return z3.And(*constraints)
 
     def __eq__(self, other):
         match other:
             case int():
-                compare_condition = And(self.type_var == TYPE_INT, self.int_var == other)
+                compare_condition = z3.And(self.type_var == TYPE_INT, self.int_var == other)
             case bool():
-                compare_condition = And(self.type_var == TYPE_BOOL, self.bool_var == other)
+                compare_condition = z3.And(self.type_var == TYPE_BOOL, self.bool_var == other)
             case str():
-                compare_condition = And(self.type_var == TYPE_STRING, self.string_var == other)
+                compare_condition = z3.And(self.type_var == TYPE_STRING, self.string_var == other)
             case _:
                 raise ValueError(f"Unsupported type for comparison: {type(other)}")
 
         return compare_condition
 
     def __ne__(self, other):
-        return Not(self.__eq__(other))
+        return z3.Not(self.__eq__(other))
