@@ -241,7 +241,7 @@ def find_test_case(pattern_matrix: PatternMatrix, pattern_vector: PatternVector)
     solver = Solver()
 
     for var in union_vars:
-        solver.add(var.type_validity())
+        solver.add(var.default_constraints())
 
     for i in range(len(pattern_matrix)):
         row = pattern_matrix[i]
@@ -251,6 +251,7 @@ def find_test_case(pattern_matrix: PatternMatrix, pattern_vector: PatternVector)
     solver.add(condition_expr_from_pattern_vector(pattern_vector, union_vars))
 
     if solver.check() == sat:
+        print("Found a test case that satisfies the pattern vector.")
         model = solver.model()
 
         test_case = []

@@ -32,6 +32,14 @@ class UnionVar:
                   self.type_var == TYPE_BOOL,
                   self.type_var == TYPE_STRING)
 
+    def default_constraints(self):
+        constraints = [self.type_validity(),
+                       Implies(self.type_var != TYPE_INT, self.int_var == 0),
+                       Implies(self.type_var != TYPE_BOOL, self.bool_var == False),
+                       Implies(self.type_var != TYPE_STRING, self.string_var == "")]
+
+        return And(*constraints)
+
     def __eq__(self, other):
         match other:
             case int():
