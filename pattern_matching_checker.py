@@ -227,15 +227,13 @@ def condition_expr_from_pattern_vector(pattern_vector: PatternVector, union_vars
     for i in range(len(pattern_vector)):
         pattern = pattern_vector[i]
 
-        condition = pattern.convert_to_condition(union_vars[i])  # union_vars[i] is the relevant UnionVar
+        condition = pattern.convert_to_condition(union_vars[i], union_vars=union_vars)  # union_vars[i] is the relevant UnionVar
         conditions.append(condition)
 
     return And(*conditions)
 
 
-def find_test_case(pattern_matrix: PatternMatrix, pattern_vector: PatternVector):
-    arity = len(pattern_vector)
-
+def find_test_case(pattern_matrix: PatternMatrix, pattern_vector: PatternVector, arity):
     union_vars = [UnionVar(f'var_{i}') for i in range(arity)]
 
     solver = Solver()
@@ -251,7 +249,6 @@ def find_test_case(pattern_matrix: PatternMatrix, pattern_vector: PatternVector)
     solver.add(condition_expr_from_pattern_vector(pattern_vector, union_vars))
 
     if solver.check() == sat:
-        print("Found a test case that satisfies the pattern vector.")
         model = solver.model()
 
         test_case = []
@@ -272,7 +269,9 @@ def find_test_case(pattern_matrix: PatternMatrix, pattern_vector: PatternVector)
         return None
 
 
-def check_useless_patterns(matrix: PatternMatrix):
+def check_useless_patterns(matrix: PatternMatrix, subjects: List[str]):
+    arity = len(matrix[0]) if matrix else 0
+
     for i in range(len(matrix)):
         partial_matrix = matrix[:i]
         current_row = matrix[i]
@@ -281,14 +280,23 @@ def check_useless_patterns(matrix: PatternMatrix):
             print(f"! {i+1}th pattern is useless")
         else:
             print(f"* {i+1}th pattern is useful")
-            print(find_test_case(partial_matrix, current_row))
+
+            test_case = find_test_case(partial_matrix, current_row, arity)
+            print(test_case)
+            for j, subject in enumerate(subjects):
+                print(f"  {subject}: {test_case[j] if test_case else 'N/A'}")
 
 
-def check_non_exhaustive_matches(matrix: PatternMatrix):
+def check_non_exhaustive_matches(matrix: PatternMatrix, subjects: List[str]):
     arity = len(matrix[0]) if matrix else 0
     wildcards = [MatchPattern.wildcard()] * arity
 
     if is_useful(matrix, PatternVector(wildcards)):
         print("The match is non-exhaustive. There are patterns that are not covered by the match cases.")
+        print("Example input:")
+
+        test_case = find_test_case(matrix, PatternVector(wildcards), arity)
+        for j, subject in enumerate(subjects):
+            print(f"  {subject}: {test_case[j] if test_case else 'N/A'}")
     else:
         print("The match is exhaustive. All possible patterns are covered by the match cases.")

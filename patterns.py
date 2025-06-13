@@ -132,7 +132,7 @@ class MatchPattern:
         else:
             return [self] + other
 
-    def convert_to_condition(self, union_var: UnionVar):
+    def convert_to_condition(self, union_var: UnionVar, union_vars: Optional[List[UnionVar]] = None) -> Bool:
         if self.is_empty:  # empty pattern, never matches
             return BoolVal(False)
         elif self.is_wildcard:  # wildcard matches anything
@@ -141,8 +141,13 @@ class MatchPattern:
             value = ast.literal_eval(self.constructor[len('literal_'):])
             return union_var == value
         elif self.is_or:
-            compares = [arg.convert_to_condition(union_var) for arg in self.args]
+            compares = [arg.convert_to_condition(union_var, union_vars=union_vars) for arg in self.args]
             return Or(*compares)
+        elif self.is_sequence:
+            if union_vars is None or len(union_vars) != len(self.args):
+                raise ValueError("Union variables must be provided for sequence patterns")
+            compares = [arg.convert_to_condition(union_vars[i]) for i, arg in enumerate(self.args)]
+            return And(*compares)
         else:
             raise NotImplementedError(f'Pattern conversion not implemented for {self.constructor} type')
 

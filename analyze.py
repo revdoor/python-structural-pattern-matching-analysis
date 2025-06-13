@@ -1,6 +1,6 @@
 import argparse
 import ast
-from pattern_converter import convert_pattern, convert_pattern_matrix
+from pattern_converter import convert_pattern, convert_pattern_matrix, get_subjects
 from pattern_matching_checker import *
 
 
@@ -31,17 +31,18 @@ if __name__ == '__main__':
         #         print(f"Error converting pattern {node}: {e}")
 
         if isinstance(node, ast.Match):
-            try:
-                pattern_matrix = convert_pattern_matrix(node)
+            # try:
+            pattern_matrix = convert_pattern_matrix(node)
+            subjects = get_subjects(node)
 
-                print(f"Converted pattern matrix")
-                for line in pattern_matrix:
-                    print(f'[{", ".join(str(p) for p in line)}]')
-                print()
+            print(f"Converted pattern matrix")
+            for line in pattern_matrix:
+                print(f'[{", ".join(str(p) for p in line)}]')
+            print()
 
-                check_useless_patterns(pattern_matrix)
-                check_non_exhaustive_matches(pattern_matrix)
-                print()
-            except Exception as e:
-                print(f"Error converting match node {node}: {e}")
-                print()
+            check_useless_patterns(pattern_matrix, subjects)
+            check_non_exhaustive_matches(pattern_matrix, subjects)
+            print()
+            # except Exception as e:
+            #     print(f"Error converting match node {node}: {e}")
+            #     print()

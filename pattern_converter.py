@@ -103,3 +103,14 @@ def convert_pattern_matrix(match_node: ast.Match) -> PatternMatrix:
         pattern_matrix.append(PatternVector(row, deepcopy(guard)))
 
     return pattern_matrix
+
+
+def get_subjects(match_node: ast.Match):
+    subject_node = match_node.subject
+
+    if isinstance(subject_node, ast.Tuple) or isinstance(subject_node, ast.List):
+        subjects = [elt.id for elt in subject_node.elts]
+    else:  # only a single subject
+        subjects = [subject_node.id]
+
+    return subjects
