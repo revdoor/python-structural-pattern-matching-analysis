@@ -6,10 +6,10 @@ from union_var import UnionVar
 
 
 @dataclass
-class Pattern:
+class MatchPattern:
     constructor: str
-    args: List['Pattern'] = None
-    kwargs: Dict[str, 'Pattern'] = None
+    args: List['MatchPattern'] = None
+    kwargs: Dict[str, 'MatchPattern'] = None
     var_name: Optional[str] = None
 
     @classmethod
@@ -33,21 +33,21 @@ class Pattern:
         return cls(constructor=f'literal_{value}', args=[])
 
     @classmethod
-    def or_pattern(cls, args: List['Pattern']):
+    def or_pattern(cls, args: List['MatchPattern']):
         return cls(constructor='or', args=args)
 
     @classmethod
-    def sequence(cls, elements: List['Pattern']):
+    def sequence(cls, elements: List['MatchPattern']):
         return cls(constructor=f'sequence_{len(elements)}', args=elements)
 
     @classmethod
-    def map(cls, keys: List[str], values: List['Pattern']):
+    def map(cls, keys: List[str], values: List['MatchPattern']):
         if len(keys) != len(values):
             raise ValueError("Keys and values must have the same length")
         return cls(constructor=f'map_{len(keys)}', kwargs={k: v for k, v in zip(keys, values)})
 
     @classmethod
-    def object(cls, name: str, args: List['Pattern'], kwargs: Dict[str, 'Pattern']):
+    def object(cls, name: str, args: List['MatchPattern'], kwargs: Dict[str, 'MatchPattern']):
         return cls(constructor=f'object_{name}', args=args, kwargs=kwargs)
 
     @property
@@ -126,7 +126,7 @@ class Pattern:
         else:
             return f'{self.constructor}({", ".join(str(arg) for arg in self.args)})'
 
-    def extend(self, other: List['Pattern']) -> List['Pattern']:
+    def extend(self, other: List['MatchPattern']) -> List['MatchPattern']:
         if self.is_sequence:
             return self.args + other
         else:
@@ -148,7 +148,7 @@ class Pattern:
 
 
 class PatternVector:
-    def __init__(self, patterns: List[Pattern], guard: Optional[ast.AST] = None):
+    def __init__(self, patterns: List[MatchPattern], guard: Optional[ast.AST] = None):
         self.patterns = patterns
         self.guard = guard
 

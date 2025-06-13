@@ -152,7 +152,7 @@ def specialize_matrix(constructor: str, arity: int, matrix: PatternMatrix) -> Pa
             return [PatternVector(specialized_row, guard)]
 
         elif first.is_wildcard:
-            specialized_row = [Pattern.wildcard()] * arity + rest
+            specialized_row = [MatchPattern.wildcard()] * arity + rest
             return [PatternVector(specialized_row, guard)]
 
         elif first.is_or:
@@ -193,7 +193,7 @@ def specialize_pattern_vector(constructor: str, arity: int, pattern_vector: Patt
         return PatternVector(patterns, guard)
 
     elif first.is_wildcard:
-        wildcards = [Pattern.wildcard()] * arity
+        wildcards = [MatchPattern.wildcard()] * arity
         return PatternVector(wildcards + rest, guard)
 
     else:
@@ -286,8 +286,9 @@ def check_useless_patterns(matrix: PatternMatrix):
 
 def check_non_exhaustive_matches(matrix: PatternMatrix):
     arity = len(matrix[0]) if matrix else 0
+    wildcards = [MatchPattern.wildcard()] * arity
 
-    if is_useful(matrix, PatternVector([Pattern.wildcard()] * arity)):
+    if is_useful(matrix, PatternVector(wildcards)):
         print("The match is non-exhaustive. There are patterns that are not covered by the match cases.")
     else:
         print("The match is exhaustive. All possible patterns are covered by the match cases.")

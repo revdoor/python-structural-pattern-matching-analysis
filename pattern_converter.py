@@ -10,34 +10,34 @@ def _extract_literal_value(node: ast.expr):
     return ast.unparse(node)
 
 
-def convert_pattern(pattern: ast.pattern) -> Pattern:
+def convert_pattern(pattern: ast.pattern) -> MatchPattern:
     if isinstance(pattern, ast.MatchValue):
         value = _extract_literal_value(pattern.value)
-        return Pattern.literal(value)
+        return MatchPattern.literal(value)
 
     elif isinstance(pattern, ast.MatchOr):
         print(f"Converting MatchOr pattern: {ast.unparse(pattern)}")
         args = [convert_pattern(p) for p in pattern.patterns]
-        return Pattern.or_pattern(args)
+        return MatchPattern.or_pattern(args)
 
     elif isinstance(pattern, ast.MatchSingleton):
         # MatchSingleton handles only None, True, or False
         value = pattern.value
-        return Pattern.literal(value)
+        return MatchPattern.literal(value)
 
     elif isinstance(pattern, ast.MatchSequence):
         elements = [convert_pattern(pattern) for pattern in pattern.patterns]
-        return Pattern.sequence(elements)
+        return MatchPattern.sequence(elements)
 
     elif isinstance(pattern, ast.MatchAs):
         if pattern.pattern is None:
             if pattern.name is None:  # wildcard pattern
-                return Pattern.wildcard()
+                return MatchPattern.wildcard()
             else:  # variable binding
                 # MatchAs without a pattern is either a wildcard or a variable binding
                 # When analyzing, the variable binding can be treated as a wildcard
                 # if there are no guard clauses
-                return Pattern.var_binding(pattern.name)
+                return MatchPattern.var_binding(pattern.name)
 
         base_pattern = convert_pattern(pattern.pattern)
         if pattern.name is not None:
@@ -49,12 +49,12 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
         # MatchStar matches the rest of the sequence in a variable length match sequence pattern
         # This is syntactically similar to a sequence of wildcards with variable-length
         # To properly analyze overall matching, we treat it as a wildcard sequence
-        return Pattern.wildcard_seq()
+        return MatchPattern.wildcard_seq()
 
     elif isinstance(pattern, ast.MatchMapping):
         keys = [_extract_literal_value(key) for key in pattern.keys]
         values = [convert_pattern(value) for value in pattern.patterns]
-        return Pattern.map(keys, values)
+        return MatchPattern.map(keys, values)
 
     elif isinstance(pattern, ast.MatchClass):
         name = pattern.cls.id if isinstance(pattern.cls, ast.Name) else ast.unparse(pattern.cls)
@@ -62,7 +62,7 @@ def convert_pattern(pattern: ast.pattern) -> Pattern:
         keys = pattern.kwd_attrs
         values = [convert_pattern(pattern) for pattern in pattern.kwd_patterns]
         kwargs = {key: value for key, value in zip(keys, values)}
-        return Pattern.object(name, args, kwargs)
+        return MatchPattern.object(name, args, kwargs)
 
     else:
         # unknown pattern type
@@ -88,15 +88,15 @@ def convert_pattern_matrix(match_node: ast.Match) -> PatternMatrix:
         if width > 1:
             if pattern_vector.is_sequence:
                 if len(pattern_vector.args) != width:  # useless clause
-                    row = [Pattern.empty()] * width
+                    row = [MatchPattern.empty()] * width
                 else:
                     row = pattern_vector.args
             elif pattern_vector.is_wildcard:
-                row = [Pattern.wildcard()] * width
+                row = [MatchPattern.wildcard()] * width
             elif pattern_vector.is_or:
                 row = [pattern_vector]
             else:  # useless clause
-                row = [Pattern.empty()] * width
+                row = [MatchPattern.empty()] * width
         else:  # width == 1
             row = [pattern_vector]
 
