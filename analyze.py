@@ -17,9 +17,6 @@ if __name__ == '__main__':
 
     root = ast.parse(code)
 
-    with open(f'ast_dump_{target.split(".")[0]}.txt', 'w') as f:
-        f.write(ast.dump(root, indent=4))
-
     for node in ast.walk(root):
         if isinstance(node, ast.Match):
             print(f"Checking pattern matching in line {node.lineno}:")
