@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 import ast
+from z3 import *
+from union_var import UnionVar
 
 
 @dataclass
@@ -129,6 +131,20 @@ class Pattern:
             return self.args + other
         else:
             return [self] + other
+
+    def convert_to_condition(self, union_var: UnionVar):
+        if self.is_empty:  # empty pattern, never matches
+            return BoolVal(False)
+        elif self.is_wildcard:  # wildcard matches anything
+            return BoolVal(True)
+        elif self.is_literal:  # literal matches specific value
+            value = ast.literal_eval(self.constructor[len('literal_'):])
+            return union_var == value
+        elif self.is_or:
+            compares = [arg.convert_to_condition(union_var) for arg in self.args]
+            return Or(*compares)
+        else:
+            raise NotImplementedError(f'Pattern conversion not implemented for {self.constructor} type')
 
 
 class PatternVector:

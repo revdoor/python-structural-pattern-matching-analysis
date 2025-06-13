@@ -1,5 +1,7 @@
 from patterns import *
 from typing import Set, Dict
+from z3 import *
+from union_var import TYPE_INT, TYPE_BOOL, TYPE_STRING, UnionVar
 
 
 def _urec(matrix: PatternMatrix, pattern_vector: PatternVector) -> bool:
@@ -216,6 +218,59 @@ def is_useful(matrix: PatternMatrix, pattern_vector: PatternVector) -> bool:
     return _urec(matrix, pattern_vector)
 
 
+def condition_expr_from_pattern_vector(pattern_vector: PatternVector, union_vars: List[UnionVar]):
+    if pattern_vector.is_empty:
+        return False
+
+    conditions = []
+
+    for i in range(len(pattern_vector)):
+        pattern = pattern_vector[i]
+
+        condition = pattern.convert_to_condition(union_vars[i])  # union_vars[i] is the relevant UnionVar
+        conditions.append(condition)
+
+    return And(*conditions)
+
+
+def find_test_case(pattern_matrix: PatternMatrix, pattern_vector: PatternVector):
+    arity = len(pattern_vector)
+
+    union_vars = [UnionVar(f'var_{i}') for i in range(arity)]
+
+    solver = Solver()
+
+    for var in union_vars:
+        solver.add(var.type_validity())
+
+    for i in range(len(pattern_matrix)):
+        row = pattern_matrix[i]
+
+        solver.add(Not(condition_expr_from_pattern_vector(row, union_vars)))
+
+    solver.add(condition_expr_from_pattern_vector(pattern_vector, union_vars))
+
+    if solver.check() == sat:
+        model = solver.model()
+
+        test_case = []
+        for var in union_vars:
+            if model[var.get_type_var()] == TYPE_INT:
+                test_case.append(model[var.get_int_var()])
+            elif model[var.get_type_var()] == TYPE_BOOL:
+                test_case.append(model[var.get_bool_var()])
+            elif model[var.get_type_var()] == TYPE_STRING:
+                test_case.append(model[var.get_string_var()])
+            else:
+                raise ValueError("Unknown type variable in model")
+
+        return test_case
+
+    else:
+        print("No test case found that satisfies the pattern vector.")
+        return None
+
+
 def check_useless_patterns(matrix: PatternMatrix):
     for i in range(len(matrix)):
         partial_matrix = matrix[:i]
@@ -225,6 +280,7 @@ def check_useless_patterns(matrix: PatternMatrix):
             print(f"! {i+1}th pattern is useless")
         else:
             print(f"* {i+1}th pattern is useful")
+            print(find_test_case(partial_matrix, current_row))
 
 
 def check_non_exhaustive_matches(matrix: PatternMatrix):
